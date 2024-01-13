@@ -1,7 +1,5 @@
-const fs = require("fs");
+const fs = require('fs');
 
-console.log("hijo de puta")
-console.log("asssssssssss")
 class ProductManager {
   constructor(filePath) {
     this.filePath = filePath;
@@ -71,10 +69,23 @@ class ProductManager {
   }
 
   deleteProduct(productCode) {
+    // Encuentra el producto que coincida con el código
+    const deletedProduct = this.products.find(product => product.code === productCode);
+
+    // Filtra los productos y mantiene solo los código que no coincidan con productCode
     this.products = this.products.filter(product => product.code !== productCode);
+
+    // Guarda la lista actualizada de productos, asumiendo que saveProducts() realiza esta tarea
     this.saveProducts();
-    console.log("Producto eliminado con código:", productCode);
-  }
+
+    if (deletedProduct) {
+        // Manda un mensaje indicando que el producto fue eliminado
+        console.log("Producto eliminado:", deletedProduct.title);
+    } else {
+        console.log("No se encontró un producto con el código:", productCode);
+    }
+}
+
 }
 
 
@@ -88,9 +99,12 @@ console.log('Todos los productos:', productManager.getProducts());
 
 console.log('Producto con código 1:', productManager.getProductByCode(1));
 
-productManager.updateProduct(1, { price: 15.99 });
+productManager.updateProduct(1, { price: 5.99 });
 
 productManager.deleteProduct(1);
+productManager.deleteProduct(5);
+
+
 
 
 console.log('Todos los productos después de operaciones:', productManager.getProducts());
