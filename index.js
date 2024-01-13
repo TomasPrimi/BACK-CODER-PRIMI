@@ -9,12 +9,13 @@ class ProductManager {
   loadProducts() {
     try {
       const data = fs.readFileSync(this.filePath, 'utf8');
-      return JSON.parse(data) || [];
+      const parsedData = JSON.parse(data);
+      return Array.isArray(parsedData) ? parsedData : [];
     } catch (error) {
-      return [];
-    }pas
+      return ;
+    }
   }
-
+  
   saveProducts() {
     const data = JSON.stringify(this.products, null, 2);
     fs.writeFileSync(this.filePath, data);
@@ -69,11 +70,15 @@ class ProductManager {
   }
 
   deleteProduct(productCode) {
+    console.log("Intentando eliminar producto con código:", productCode);
     // Encuentra el producto que coincida con el código
     const deletedProduct = this.products.find(product => product.code === productCode);
 
     // Filtra los productos y mantiene solo los código que no coincidan con productCode
     this.products = this.products.filter(product => product.code !== productCode);
+    
+    // Muestra el contenido actual de this.products después de filtrar
+    console.log("Productos después de filtrar:", this.products);
 
     // Guarda la lista actualizada de productos, asumiendo que saveProducts() realiza esta tarea
     this.saveProducts();
@@ -92,8 +97,6 @@ class ProductManager {
 const productManager = new ProductManager('products.json');
 
 
-productManager.addProduct('Milanesa a la Napolitana', 'Description 1', 10.99, 'thumbnail1.jpg', 1, 3);
-productManager.addProduct('Pastel De Papa', 'Description 2', 19.99, 'thumbnail2.jpg', 4, 2);
 
 console.log('Todos los productos:', productManager.getProducts());
 
@@ -101,7 +104,7 @@ console.log('Producto con código 1:', productManager.getProductByCode(1));
 
 productManager.updateProduct(1, { price: 5.99 });
 
-productManager.deleteProduct(1);
+productManager.deleteProduct(2);
 productManager.deleteProduct(5);
 
 
