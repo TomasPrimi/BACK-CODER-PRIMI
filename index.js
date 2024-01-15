@@ -3,55 +3,62 @@ const fs = require('fs');
 class ProductManager {
   constructor(filePath) {
     this.filePath = filePath;
-    this.products = this.loadProducts();
+    this.loadProducts();
+    this.id = this.calculateNextId(); 
+  }
+
+  calculateNextId() {
+    const maxId = this.products.reduce((max, product) => (product.id > max ? product.id : max), 0);
+    return maxId + 1;
   }
 
   loadProducts() {
     try {
       const data = fs.readFileSync(this.filePath, 'utf8');
       const parsedData = JSON.parse(data);
-      return Array.isArray(parsedData) ? parsedData : [];
+      
+      this.products = Array.isArray(parsedData.products) ? parsedData.products : [];
+  
+      if (!Array.isArray(this.products)) {
+        console.error("Los datos en el archivo no son un array válido.");
+        this.products = [];
+      }
     } catch (error) {
-      return ;
+      this.products = [];
     }
   }
-  
+
   saveProducts() {
-    const data = JSON.stringify(this.products, null, 2);
+    const data = JSON.stringify({ products: this.products }, null, 2);
     fs.writeFileSync(this.filePath, data);
   }
 
-  addProduct(title, description, price, thumbnail, code, stock) {
-    if (!title || !description || !price || !thumbnail || !code || !stock) {
+  addProduct(product) {
+    if (!product.title || !product.description || !product.price || !product.thumbnail || !product.code || !product.stock) {
       console.error("Todos los campos son obligatorios.");
       return;
     }
 
-    const isCodeUnique = !this.products.some(product => product.code === code);
+    const isCodeUnique = this.products.some(existingProduct => existingProduct.code === product.code);
     if (!isCodeUnique) {
       console.error("Hay un producto con el mismo código que ya existe.");
       return;
     }
 
-    const newProduct = {
-      title,
-      description,
-      price,
-      thumbnail,
-      code,
-      stock,
-    };
-    this.products.push(newProduct);
+    product.id = this.id++; 
+    this.products.push(product);
     this.saveProducts();
-    console.log("Producto agregado:", newProduct);
+    console.log("Producto agregado:", product);
   }
 
   getProducts() {
+    this.loadProducts();
     return this.products;
   }
 
-  getProductByCode(productCode) {
-    const product = this.products.find(product => product.code === productCode);
+  getProductById(productId) {
+    this.loadProducts();
+    const product = this.products.find(product => product.id === productId);
 
     if (product) {
       return product;
@@ -61,53 +68,46 @@ class ProductManager {
     }
   }
 
-  updateProduct(productCode, updatedProduct) {
+  updateProduct(productId, updatedProduct) {
     this.products = this.products.map(product =>
-      product.code === productCode ? { ...product, ...updatedProduct } : product
+      product.id === productId ? { ...product, ...updatedProduct } : product
     );
     this.saveProducts();
-    console.log("Producto actualizado:", this.getProductByCode(productCode));
+    console.log("Producto actualizado:", this.getProductById(productId));
   }
 
-  deleteProduct(productCode) {
-    console.log("Intentando eliminar producto con código:", productCode);
-    // Encuentra el producto que coincida con el código
-    const deletedProduct = this.products.find(product => product.code === productCode);
-
-    // Filtra los productos y mantiene solo los código que no coincidan con productCode
-    this.products = this.products.filter(product => product.code !== productCode);
-    
-    // Muestra el contenido actual de this.products después de filtrar
-    console.log("Productos después de filtrar:", this.products);
-
-    // Guarda la lista actualizada de productos, asumiendo que saveProducts() realiza esta tarea
+  deleteProduct(productId) {
+    this.products = this.products.filter(product => product.id !== productId);
     this.saveProducts();
-
-    if (deletedProduct) {
-        // Manda un mensaje indicando que el producto fue eliminado
-        console.log("Producto eliminado:", deletedProduct.title);
-    } else {
-        console.log("No se encontró un producto con el código:", productCode);
-    }
+    console.log("Producto eliminado con ID:", productId);
+  }
 }
-
-}
-
 
 const productManager = new ProductManager('products.json');
 
+productManager.addProduct({
+  title: 'Milanesa a la Napolitana',
+  description: 'Description 1',
+  price: 10.99,
+  thumbnail: 'thumbnail1.jpg',
+  code: 1,
+  stock: 3
+});
 
+productManager.addProduct({
+  title: 'Pastel De Papa',
+  description: 'Description 2',
+  price: 19.99,
+  thumbnail: 'thumbnail2.jpg',
+  code: 4,
+  stock: 2
+});
 
 console.log('Todos los productos:', productManager.getProducts());
+console.log('Producto con ID 1:', productManager.getProductById(1));
 
-console.log('Producto con código 1:', productManager.getProductByCode(1));
+productManager.updateProduct(1, { price: 15.99 });
 
-productManager.updateProduct(1, { price: 5.99 });
-
-productManager.deleteProduct(2);
-productManager.deleteProduct(5);
-
-
-
+productManager.deleteProduct(4);
 
 console.log('Todos los productos después de operaciones:', productManager.getProducts());
