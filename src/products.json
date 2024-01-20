@@ -1,0 +1,58 @@
+{
+  "products": [
+      {
+        "id": 1,
+        "title": "Milanesa a la Napolitana",
+        "description": "La especialidad de la casa, una exquisita milanesa de pollo cubierta con salsa de tomate, jamón y queso derretido. ¡Una delicia tradicional argentina para disfrutar en casa!",
+        "price": 7.99,
+        "thumbnail": "thumbnail1.jpg",
+        "code": 1,
+        "stock": 777
+      },
+      {
+        "id": 2,
+        "title": "Pastel De Papa",
+        "description": "Capas de puré de papas suave con relleno de carne sazonada y verduras. ¡Una opción reconfortante y sabrosa para cualquier ocasión!",
+        "price": 6.99,
+        "thumbnail": "thumbnail2.jpg",
+        "code": 2,
+        "stock": 17
+      },
+      {
+        "id": 3,
+        "title": "Pizzeta",
+        "description": "Versión individual de la clásica pizza. Masa fina y crujiente con salsa de tomate, queso y tus ingredientes favoritos. ¡Auténtica y deliciosa!",
+        "price": 4.99,
+        "thumbnail": "thumbnail3.jpg",
+        "code": 3,
+        "stock": 13
+      },
+      {
+        "id": 4,
+        "title": "Ensalada Rusa",
+        "description": "Mezcla fresca de papas, zanahorias, guisantes y mayonesa. ¡Un acompañamiento ligero y sabroso para cualquier comida!",
+        "price": 3.99,
+        "thumbnail": "thumbnail4.jpg",
+        "code": 4,
+        "stock": 8
+      },
+      {
+        "id": 5,
+        "title": "Calzone",
+        "description": "Variante italiana de la pizza con masa rellena. Tomate, queso, jamón y más, ¡todo en un delicioso paquete plegado!",
+        "price": 9.99,
+        "thumbnail": "thumbnail5.jpg",
+        "code": 5,
+        "stock": 16
+      },
+      {
+        "id": 6,
+        "title": "Canelones",
+        "description": "Rollos de pasta rellenos de carne, espinacas y ricotta. Cubiertos con salsa de tomate y queso derretido. ¡Sabor italiano para tus comidas!",
+        "price": 4.99,
+        "thumbnail": "thumbnail6.jpg",
+        "code": 6,
+        "stock": 10
+      }
+    ]
+  }
