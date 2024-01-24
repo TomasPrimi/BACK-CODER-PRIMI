@@ -6,19 +6,18 @@ class ProductManager {
     this.loadProducts();
     this.id = this.calculateNextId();
   }
-
   calculateNextId() {
-    const maxId = this.products.reduce((max, product) => (product.id > max ? product.id : max), 0);
+    const maxId = this.products ? this.products.reduce((max, product) => (product.id > max ? product.id : max), 0) : 0;
     return maxId + 1;
   }
 
-  loadProducts() {
+  async loadProducts() {
     try {
-      const data = fs.readFileSync(this.filePath, 'utf8');
+      const data = await fs.readFile(this.filePath, 'utf8');
       const parsedData = JSON.parse(data);
-    
+
       this.products = Array.isArray(parsedData.products) ? parsedData.products : [];
-  
+
       if (!Array.isArray(this.products)) {
         console.error("Los datos en el archivo no son un array válido.");
         this.products = [];
@@ -28,10 +27,14 @@ class ProductManager {
     }
   }
 
-
-  saveProducts() {
+  async saveProducts() {
     const data = JSON.stringify({ products: this.products }, null, 2);
-    fs.writeFileSync(this.filePath, data);
+    try {
+      await fs.writeFile(this.filePath, data);
+    } catch (error) {
+      console.error("Error al guardar productos", error);
+      throw error;
+    }
   }
 
   addProduct(product) {
@@ -46,55 +49,20 @@ class ProductManager {
       return;
     }
 
-    product.id = this.id++; 
+    product.id = this.id++;
     this.products.push(product);
-    this.saveProducts();
-    console.log("Producto agregado:", product);
+    this.saveProducts().then(() => {
+      console.log("Producto agregado:", product);
+    });
   }
 
   getProducts() {
-    this.loadProducts();
-    return this.products;
-  }
-
-  getProductById(productId) {
-    this.loadProducts();
-    const product = this.products.find(product => product.id === productId);
-
-    if (product) {
-      return product;
-    } else {
-      console.log("Producto no encontrado");
-      return undefined;
-    }
-  }
-
-  updateProduct(productId, updatedProduct) {
-    this.products = this.products.map(product =>
-      product.id === productId ? { ...product, ...updatedProduct } : product
-    );
-    this.saveProducts();
-    console.log("Producto actualizado:", this.getProductById(productId));
-  }
-
-  deleteProduct(productId) {
-    this.products = this.products.filter(product => product.id !== productId);
-    this.saveProducts();
-    console.log("Producto eliminado con ID:", productId);
+    return this.loadProducts().then(() => this.products);
   }
 
   async getProductById(productId) {
     try {
-      const data = await fs.readFile(this.filePath, 'utf8');
-      const parsedData = JSON.parse(data);
-
-      this.products = Array.isArray(parsedData.products) ? parsedData.products : [];
-
-      if (!Array.isArray(this.products)) {
-        console.error("Los datos en el archivo no son un array válido.");
-        this.products = [];
-      }
-
+      await this.loadProducts();
       const product = this.products.find(product => product.id === productId);
 
       if (product) {
@@ -107,6 +75,22 @@ class ProductManager {
       console.error("Error al obtener el producto por ID", error);
       throw error;
     }
+  }
+
+  updateProduct(productId, updatedProduct) {
+    this.products = this.products.map(product =>
+      product.id === productId ? { ...product, ...updatedProduct } : product
+    );
+    this.saveProducts().then(() => {
+      console.log("Producto actualizado:", this.getProductById(productId));
+    });
+  }
+
+  deleteProduct(productId) {
+    this.products = this.products.filter(product => product.id !== productId);
+    this.saveProducts().then(() => {
+      console.log("Producto eliminado con ID:", productId);
+    });
   }
 }
 

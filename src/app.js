@@ -1,22 +1,67 @@
 const express = require('express');
-const ProductManager = require('./productManager');
+const ProductManager = require('./ProductManager');
+const CartManager = require('./CartManager'); 
 
 const app = express();
-const port = 3000;
-
+const port = 4000;
 const productManager = new ProductManager('products.json');
+const cartManager = new CartManager('carts.json'); 
 
-app.get('/products', async (req, res) => {
+app.post('/api/carts/create/:userId', async (req, res) => {
+  try {
+    const userId = parseInt(req.params.userId);
+
+    const newCart = await cartManager.createCart(userId);
+
+    res.json({ cart: newCart });
+  } catch (error) {
+    console.error('Error al crear un carrito', error);
+    res.status(500).json({ error: 'Error al crear un carrito' });
+  }
+});
+
+app.get('/api/products', async (req, res) => {
   try {
     const limit = req.query.limit;
-    const products = limit ? productManager.getProducts().slice(0, limit) : productManager.getProducts();
+    const products = limit ? await productManager.getProducts().then(products => products.slice(0, limit)) : await productManager.getProducts();
     res.json({ products });
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener productos' });
   }
 });
 
-app.get('/products/:pid', async (req, res) => {
+app.get('/api/carts', async (req, res) => {
+  try {
+    const carts = await cartManager.getCarts();
+    res.json({ carts });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener carritos' });
+  }
+});
+
+app.post('/api/carts/:cartId/add-product/:productId', async (req, res) => {
+  try {
+    const cartId = parseInt(req.params.cartId);
+    const productId = parseInt(req.params.productId);
+
+    const product = await productManager.getProductById(productId);
+
+    if (!product) {
+      return res.status(404).json({ error: 'Producto no encontrado' });
+    }
+
+    await cartManager.addToCart(cartId, product);
+
+    const updatedCart = await cartManager.getCartById(cartId);
+
+    res.json({ cart: updatedCart });
+  } catch (error) {
+    console.error('Error al agregar producto al carrito', error);
+    res.status(500).json({ error: 'Error al agregar producto al carrito' });
+  }
+});
+
+app.get('/api/products/:pid', async (req, res) => {
   try {
     const productId = parseInt(req.params.pid);
     const product = await productManager.getProductById(productId);
