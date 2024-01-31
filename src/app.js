@@ -18,6 +18,7 @@ app.post('/api/carts/create/:userId', async (req, res) => {
   }
 });
 
+
 app.get('/api/products', async (req, res) => {
   try {
     const limit = req.query.limit;
@@ -37,7 +38,7 @@ app.get('/api/carts', async (req, res) => {
   }
 });
 
-// Agregar un producto a un carrito
+
 app.post('/api/carts/:cartId/add-product/:productId', async (req, res) => {
   try {
     const cartId = parseInt(req.params.cartId);
@@ -84,29 +85,6 @@ app.get('/:cid', async (req, res) => {
   }
 });
 
-app.post('/:cid/product/:pid', async (req, res) => {
-  try {
-    const cartId = parseInt(req.params.cid);
-    const productId = parseInt(req.params.pid);
-    const cart = await cartManager.getCartById(cartId);
-    if (!cart) {
-      return res.status(404).json({ error: 'Carrito no encontrado' });
-    }
-    const product = await productManager.getProductById(productId);
-    if (!product) {
-      return res.status(404).json({ error: 'Producto no encontrado' });
-    }
-    const result = await cartManager.addProductToCart(cartId, productId);
-    if (!result.success) {
-      return res.status(400).json({ error: result.message });
-    }
-    const updatedCart = await cartManager.getCartById(cartId);
-    res.json({ cart: updatedCart });
-  } catch (error) {
-    console.error('Error al agregar producto al carrito', error);
-    res.status(500).json({ error: 'Error al agregar producto al carrito' });
-  }
-});
 
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);
