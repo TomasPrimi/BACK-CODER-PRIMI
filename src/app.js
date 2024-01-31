@@ -7,6 +7,9 @@ const port = 4000;
 const productManager = new ProductManager('products.json');
 const cartManager = new CartManager('carts.json'); 
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 app.post('/api/carts/create/:userId', async (req, res) => {
   try {
     const userId = parseInt(req.params.userId);
@@ -67,6 +70,22 @@ app.get('/api/products/:pid', async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener el producto' });
+  }
+});
+
+
+app.delete('/api/products/:pid', async (req, res) => {
+  try {
+    const productId = parseInt(req.params.pid);
+    const deleted = await productManager.deleteProduct(productId);
+
+    if (deleted) {
+      res.json({ product: deleted });
+    } else {
+      res.status(404).json({ error: 'Producto no encontrado' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Error al eliminar el producto' });
   }
 });
 
