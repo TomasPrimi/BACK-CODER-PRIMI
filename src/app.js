@@ -73,7 +73,31 @@ app.get('/api/products/:pid', async (req, res) => {
   }
 });
 
+router.post('/', (req, res) => {
+  try {
+    const { title, description, code, price, stock, category, thumbnails } = req.body;
 
+    if (!title || !description || !code || !price || !stock || !category) {
+      throw new Error("Todos los campos son obligatorios, excepto thumbnails");
+    }
+    const newProduct = {
+      title,
+      description,
+      code,
+      price,
+      stock,
+      category,
+      thumbnails: thumbnails || [],
+      status: true,
+      id: productManager.calculateNextId(), 
+    };
+
+    productManager.addProduct(newProduct);
+    res.json({ product: newProduct });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
 app.delete('/api/products/:pid', async (req, res) => {
   try {
     const productId = parseInt(req.params.pid);
