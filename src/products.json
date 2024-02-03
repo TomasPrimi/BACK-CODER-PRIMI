@@ -14,7 +14,7 @@
         "title": "Pastel De Papa",
         "description": "Capas de puré de papas suave con relleno de carne sazonada y verduras. ¡Una opción reconfortante y sabrosa para cualquier ocasión!",
         "price": 6.99,
-        "thumbnail": "thumbnail2.jpg",
+        "thumbnail": "pasteldepapa.jpg",
         "code": 2,
         "stock": 17
       },
@@ -23,7 +23,7 @@
         "title": "Pizzeta",
         "description": "Versión individual de la clásica pizza. Masa fina y crujiente con salsa de tomate, queso y tus ingredientes favoritos. ¡Auténtica y deliciosa!",
         "price": 4.99,
-        "thumbnail": "thumbnail3.jpg",
+        "thumbnail": "pizzeta.jpg",
         "code": 3,
         "stock": 13
       },
@@ -32,7 +32,7 @@
         "title": "Ensalada Rusa",
         "description": "Mezcla fresca de papas, zanahorias, guisantes y mayonesa. ¡Un acompañamiento ligero y sabroso para cualquier comida!",
         "price": 3.99,
-        "thumbnail": "thumbnail4.jpg",
+        "thumbnail": "ensalada rusa.jpg",
         "code": 4,
         "stock": 8
       },
@@ -41,7 +41,7 @@
         "title": "Calzone",
         "description": "Variante italiana de la pizza con masa rellena. Tomate, queso, jamón y más, ¡todo en un delicioso paquete plegado!",
         "price": 9.99,
-        "thumbnail": "thumbnail5.jpg",
+        "thumbnail": "calzone.jpg",
         "code": 5,
         "stock": 16
       },
@@ -50,7 +50,7 @@
         "title": "Canelones",
         "description": "Rollos de pasta rellenos de carne, espinacas y ricotta. Cubiertos con salsa de tomate y queso derretido. ¡Sabor italiano para tus comidas!",
         "price": 4.99,
-        "thumbnail": "thumbnail6.jpg",
+        "thumbnail": "canelones.jpg",
         "code": 6,
         "stock": 10
       }
