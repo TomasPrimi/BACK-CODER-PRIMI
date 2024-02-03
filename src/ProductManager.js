@@ -19,12 +19,12 @@ class ProductManager {
       this.products = Array.isArray(parsedData.products) ? parsedData.products : [];
 
       if (!Array.isArray(this.products)) {
-        console.error('Data in the file is not a valid array.');
+        console.error('La informacion no es valida.');
         this.products = [];
       }
     } catch (error) {
       this.products = [];
-      console.error('Error loading products', error);
+      console.error('Error cargando los productos', error);
     }
   }
 
@@ -33,7 +33,7 @@ class ProductManager {
     try {
       await fs.writeFile(this.filePath, data);
     } catch (error) {
-      console.error('Error saving products', error);
+      console.error('Error guardando los productos', error);
       throw error;
     }
   }
@@ -46,14 +46,14 @@ class ProductManager {
 
     const isCodeUnique = this.products.some(existingProduct => existingProduct.code === product.code);
     if (isCodeUnique) {
-      console.error('There is a product with the same code that already exists.');
+      console.error('Ya existe un producto con el mismo codigo.');
       return;
     }
 
     product.id = this.calculateNextId();
     this.products.push(product);
     this.saveProducts().then(() => {
-      console.log('Product added:', product);
+      console.log('Producto añadido correctamente:', product);
     });
   }
 
@@ -70,11 +70,11 @@ class ProductManager {
       if (product) {
         return product;
       } else {
-        console.log('Product not found');
+        console.log('Producto no encontrado');
         return undefined;
       }
     } catch (error) {
-      console.error('Error getting product by ID', error);
+      console.error('Error obteniendo el producto mediante el id', error);
       throw error;
     }
   }

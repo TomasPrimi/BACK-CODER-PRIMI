@@ -1,9 +1,14 @@
 const express = require('express');
-const ProductManager = require('./productManager');
-const CartManager = require('./cartManager');
 const bodyParser = require('body-parser');
+const http = require('http');
+const socketIo = require('socket.io');
+const ProductManager = require('./ProductManager');
+const CartManager = require('./CartManager');
 
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
+
 const port = 8080;
 const productManager = new ProductManager('products.json');
 const cartManager = new CartManager('carts.json');
@@ -17,7 +22,7 @@ app.get('/api/products', async (req, res) => {
     const products = limit ? await productManager.getProducts().then(products => products.slice(0, limit)) : await productManager.getProducts();
     res.json({ products });
   } catch (error) {
-    res.status(500).json({ error: 'Error getting products' });
+    res.status(500).json({ error: 'Error obteniendo los productos' });
   }
 });
 
@@ -28,10 +33,10 @@ app.get('/api/products/:pid', async (req, res) => {
     if (product) {
       res.json({ product });
     } else {
-      res.status(404).json({ error: 'Product not found' });
+      res.status(404).json({ error: 'Producto no encontrado' });
     }
   } catch (error) {
-    res.status(500).json({ error: 'Error getting the product' });
+    res.status(500).json({ error: 'Error obteniendo el producto' });
   }
 });
 
@@ -56,6 +61,7 @@ app.post('/api/products', async (req, res) => {
 
     productManager.addProduct(newProduct);
     res.json({ product: newProduct });
+    io.emit('producto_creado', newProduct);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -71,10 +77,10 @@ app.put('/api/products/:pid', async (req, res) => {
     if (product) {
       res.json({ product });
     } else {
-      res.status(404).json({ error: 'Product not found' });
+      res.status(404).json({ error: 'Producto no encontrado' });
     }
   } catch (error) {
-    res.status(500).json({ error: 'Error updating the product' });
+    res.status(500).json({ error: 'Error actualizando el producto' });
   }
 });
 
@@ -86,10 +92,10 @@ app.delete('/api/products/:pid', async (req, res) => {
     if (deleted) {
       res.json({ product: deleted });
     } else {
-      res.status(404).json({ error: 'Product not found' });
+      res.status(404).json({ error: 'Producto no encontrado' });
     }
   } catch (error) {
-    res.status(500).json({ error: 'Error deleting the product' });
+    res.status(500).json({ error: 'Error eliminando el producto' });
   }
 });
 
@@ -98,8 +104,8 @@ app.post('/api/carts', async (req, res) => {
     const newCart = await cartManager.createCart();
     res.json({ cart: newCart });
   } catch (error) {
-    console.error('Error creating a cart', error);
-    res.status(500).json({ error: 'Error creating a cart' });
+    console.error('Error creando un carrito', error);
+    res.status(500).json({ error: 'Error creando un carrito' });
   }
 });
 
@@ -131,14 +137,34 @@ app.post('/api/carts/:cid/product/:pid', async (req, res) => {
     if (productsInCart.length > 0) {
       res.json({ products: productsInCart });
     } else {
-      res.status(404).json({ error: 'Cart or product not found' });
+      res.status(404).json({ error: 'Carrito o producto no encontrado' });
     }
   } catch (error) {
-    console.error('Error adding product to cart', error);
-    res.status(500).json({ error: 'Error adding product to cart' });
+    console.error('Error añadiendo un producto al carrito', error);
+    res.status(500).json({ error: 'Error añadiendo un producto al carrito' });
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+io.on('connection', (socket) => {
+  console.log('Nuevo cliente conectado');
+
+  socket.on('mensaje_cliente', (mensaje) => {
+    console.log('Mensaje recibido del cliente:', mensaje);
+    socket.emit('mensaje_servidor', 'Mensaje recibido por el servidor');
+  });
+
+  socket.on('nuevo_producto', (producto) => {
+    console.log('Nuevo producto recibido:', producto);
+
+    io.emit('producto_creado', producto);
+  });
+
+
+  socket.on('disconnect', () => {
+    console.log('Cliente desconectado');
+  });
+});
+
+server.listen(port, () => {
+  console.log(`Servidor corriendo en http://localhost:${port}`);
 });

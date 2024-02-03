@@ -15,7 +15,7 @@ class CartManager {
     try {
       await fs.writeFile(this.filePath, data);
     } catch (error) {
-      console.error('Error saving carts', error);
+      console.error('Error guardando el carrito', error);
       throw error;
     }
   }
@@ -33,7 +33,7 @@ class CartManager {
       }
     } catch (error) {
       this.carts = [];
-      console.error('Error loading carts', error);
+      console.error('Error cargando el carrito', error);
     }
   }
 
@@ -49,11 +49,11 @@ class CartManager {
       if (cart) {
         return cart;
       } else {
-        console.log('Cart not found');
+        console.log('Carro no encontrado');
         return undefined;
       }
     } catch (error) {
-      console.error('Error getting cart by ID', error);
+      console.error('Error obteniendo el id del carrito', error);
       throw error;
     }
   }
@@ -65,7 +65,7 @@ class CartManager {
       const cart = this.carts.find(cart => cart.id == cartId);
 
       if (!cart) {
-        throw new Error('Cart not found');
+        throw new Error('Carro no encontrado');
       }
 
       const existingProduct = cart.products.find(product => product.id === productId);
@@ -80,7 +80,7 @@ class CartManager {
 
       return cart.products;
     } catch (error) {
-      console.error('Error adding product to cart', error);
+      console.error('Error añadiendo productos al carrito', error);
       throw error;
     }
   }
@@ -98,11 +98,11 @@ class CartManager {
 
       await this.saveCarts();
 
-      console.log('New cart created:', newCart);
+      console.log('Nuevo carrito creado:', newCart);
 
       return newCart;
     } catch (error) {
-      console.error('Error creating a new cart', error);
+      console.error('Error creando un nuevo carrito', error);
       throw error;
     }
   }
@@ -127,12 +127,12 @@ class CartManager {
 
   async getProductsInCart(cartProducts) {
     try {
-      console.log('Loading products...');
+      console.log('cargando productos...');
       await this.loadProducts();
-      console.log('Products loaded:', this.products);
+      console.log('Productos cargados:', this.products);
   
       const productsInCart = this.products.filter(product => cartProducts.some(cartProduct => cartProduct.id === product.id));
-      console.log('Products in cart:', productsInCart);
+      console.log('Productos en el carrito:', productsInCart);
   
       return productsInCart;
     } catch (error) {
