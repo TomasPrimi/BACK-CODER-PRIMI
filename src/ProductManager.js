@@ -4,8 +4,8 @@ class ProductManager {
   constructor(filePath) {
     this.filePath = filePath;
     this.loadProducts();
-    this.id = this.calculateNextId();
   }
+
   calculateNextId() {
     const maxId = this.products ? this.products.reduce((max, product) => (product.id > max ? product.id : max), 0) : 0;
     return maxId + 1;
@@ -19,11 +19,12 @@ class ProductManager {
       this.products = Array.isArray(parsedData.products) ? parsedData.products : [];
 
       if (!Array.isArray(this.products)) {
-        console.error("Los datos en el archivo no son un array válido.");
+        console.error('Data in the file is not a valid array.');
         this.products = [];
       }
     } catch (error) {
       this.products = [];
+      console.error('Error loading products', error);
     }
   }
 
@@ -32,32 +33,33 @@ class ProductManager {
     try {
       await fs.writeFile(this.filePath, data);
     } catch (error) {
-      console.error("Error al guardar productos", error);
+      console.error('Error saving products', error);
       throw error;
     }
   }
 
   addProduct(product) {
-    if (!product.title || !product.description || !product.price || !product.thumbnail || !product.code || !product.stock) {
-      console.error("Todos los campos son obligatorios.");
+    if (!product.title || !product.description || !product.price || !product.code || !product.stock) {
+      console.error('All fields are mandatory.');
       return;
     }
 
     const isCodeUnique = this.products.some(existingProduct => existingProduct.code === product.code);
-    if (!isCodeUnique) {
-      console.error("Hay un producto con el mismo código que ya existe.");
+    if (isCodeUnique) {
+      console.error('There is a product with the same code that already exists.');
       return;
     }
 
-    product.id = this.id++;
+    product.id = this.calculateNextId();
     this.products.push(product);
     this.saveProducts().then(() => {
-      console.log("Producto agregado:", product);
+      console.log('Product added:', product);
     });
   }
 
-  getProducts() {
-    return this.loadProducts().then(() => this.products);
+  async getProducts() {
+    await this.loadProducts();
+    return this.products;
   }
 
   async getProductById(productId) {
@@ -68,30 +70,60 @@ class ProductManager {
       if (product) {
         return product;
       } else {
-        console.log("Producto no encontrado");
+        console.log('Product not found');
         return undefined;
       }
     } catch (error) {
-      console.error("Error al obtener el producto por ID", error);
+      console.error('Error getting product by ID', error);
       throw error;
     }
   }
 
-  updateProduct(productId, updatedProduct) {
-    this.products = this.products.map(product =>
-      product.id === productId ? { ...product, ...updatedProduct } : product
-    );
-    this.saveProducts().then(() => {
-      console.log("Producto actualizado:", this.getProductById(productId));
-    });
+  async updateProduct(productId, updatedProduct) {
+    try {
+      await this.loadProducts();
+  
+      const productIndex = this.products.findIndex(product => product.id === productId);
+  
+      if (productIndex === -1) {
+        throw new Error('Producto no encontrado');
+      }
+  
+      this.products[productIndex] = { ...this.products[productIndex], ...updatedProduct };
+  
+      await this.saveProducts();
+  
+      console.log('Producto actualizado:', this.products[productIndex]);
+      return this.products[productIndex];
+    } catch (error) {
+      console.error('Error al actualizar producto', error);
+      throw error;
+    }
   }
-
-  deleteProduct(productId) {
-    this.products = this.products.filter(product => product.id !== productId);
-    this.saveProducts().then(() => {
-      console.log("Producto eliminado con ID:", productId);
-    });
+  
+  
+  async deleteProduct(productId) {
+    try {
+      await this.loadProducts();
+  
+      const index = this.products.findIndex(product => product.id === productId);
+  
+      if (index === -1) {
+        throw new Error('Producto no encontrado');
+      }
+  
+      const deletedProduct = this.products.splice(index, 1)[0];
+  
+      await this.saveProducts();
+  
+      console.log('Producto eliminado:', deletedProduct);
+      return deletedProduct;
+    } catch (error) {
+      console.error('Error al eliminar producto', error);
+      throw error;
+    }
   }
+  
 }
 
 module.exports = ProductManager;
