@@ -11,6 +11,7 @@ class ProductManager {
     return maxId + 1;
   }
 
+  
   async loadProducts() {
     try {
       const data = await fs.readFile(this.filePath, 'utf8');

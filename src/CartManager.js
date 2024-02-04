@@ -37,6 +37,7 @@ class CartManager {
     }
   }
 
+  
   generateUniqueId() {
     return Date.now().toString();
   }

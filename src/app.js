@@ -26,6 +26,7 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
+
 app.get('/api/products/:pid', async (req, res) => {
   try {
     const productId = parseInt(req.params.pid);
