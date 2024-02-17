@@ -4,17 +4,43 @@ const http = require('http');
 const socketIo = require('socket.io');
 const ProductManager = require('./ProductManager');
 const CartManager = require('./CartManager');
-const exphbs  = require('express-handlebars');
+const exphbs = require('express-handlebars');
+const mongoose = require('mongoose');
+const { MongoClient, ServerApiVersion } = require('mongodb');
+const uri = "mongodb+srv://tomasprimi:<Visualcoderback1234> @ecommerce.xi0t48d.mongodb.net/?retryWrites=true&w=majority";
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
+const mongoURI = 'tu_cadena_de_conexión';
+
 
 const port = 8080;
 const productManager = new ProductManager('products.json');
 const cartManager = new CartManager('carts.json');
 
-app.engine('handlebars', exphbs());
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
+});
+async function run() {
+  try {
+    // Connect the client to the server	(optional starting in v4.7)
+    await client.connect();
+    // Send a ping to confirm a successful connection
+    await client.db("admin").command({ ping: 1 });
+    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+  } finally {
+    // Ensures that the client will close when you finish/error
+    await client.close();
+  }
+}
+run().catch(console.dir);
+app.engine('handlebars', exphbs.engine());
 app.set('view engine', 'handlebars');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -169,6 +195,7 @@ io.on('connection', (socket) => {
     console.log('Cliente desconectado');
   });
 });
+
 
 server.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);
