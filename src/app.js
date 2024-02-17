@@ -4,6 +4,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const ProductManager = require('./ProductManager');
 const CartManager = require('./CartManager');
+const exphbs  = require('express-handlebars');
 
 const app = express();
 const server = http.createServer(app);
@@ -13,6 +14,8 @@ const port = 8080;
 const productManager = new ProductManager('products.json');
 const cartManager = new CartManager('carts.json');
 
+app.engine('handlebars', exphbs());
+app.set('view engine', 'handlebars');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -20,11 +23,12 @@ app.get('/api/products', async (req, res) => {
   try {
     const limit = req.query.limit;
     const products = limit ? await productManager.getProducts().then(products => products.slice(0, limit)) : await productManager.getProducts();
-    res.json({ products });
+    res.render('products', { products });
   } catch (error) {
-    res.status(500).json({ error: 'Error obteniendo los productos' });
+    res.status(500).send('Error obteniendo los productos');
   }
 });
+
 
 
 app.get('/api/products/:pid', async (req, res) => {
