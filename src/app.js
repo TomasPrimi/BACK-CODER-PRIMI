@@ -2,24 +2,52 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const http = require('http');
 const socketIo = require('socket.io');
-const ProductManager = require('./ProductManager');
-const CartManager = require('./CartManager');
+const ProductManager = require('../dao/ProductManager');
+const CartManager = require('../dao/CartManager');
 const exphbs = require('express-handlebars');
 const mongoose = require('mongoose');
 const { MongoClient, ServerApiVersion } = require('mongodb');
+const { connect } = require('http2');
 const uri = "mongodb+srv://tomasprimi:<Visualcoderback1234> @ecommerce.xi0t48d.mongodb.net/?retryWrites=true&w=majority";
+const Message = require('../dao/models/MessageSchema'); 
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 const mongoURI = 'tu_cadena_de_conexión';
-
+const DB_HOST = "localhost";
+const DB_PORT = 27017;
+const DB_NAME = "Ecommerce";
 
 const port = 8080;
 const productManager = new ProductManager('products.json');
 const cartManager = new CartManager('carts.json');
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+const connection = mongoose.connect(`mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`)
+  .then((conn) => {
+    console.log("CONEXIÓN EXITOSA A MONGODB", conn);
+  })
+  .catch((err) => {
+    console.log("ERROR DE CONEXIÓN!!!", err.message);
+  });
+
+  mongoose.connect(`mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => {
+    console.log("Conexión exitosa a MongoDB");
+  })
+  .catch((err) => {
+    console.error("Error de conexión a MongoDB:", err.message);
+  });
+
+  const messageSchema = new mongoose.Schema({
+    user: { type: String, required: true },
+    message: { type: String, required: true },
+    timestamp: { type: Date, default: Date.now }
+  });
+
+  
+  module.exports = Message;
+
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -27,18 +55,42 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
+
 async function run() {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    await client.db(DB_NAME).command({ ping: 1 });
+    console.log("Conexión exitosa a MongoDB! Ping a tu despliegue.");
   } finally {
-    // Ensures that the client will close when you finish/error
     await client.close();
   }
 }
+const socket = io();
+
+const chatMessages = document.getElementById('chat-messages');
+const messageInput = document.getElementById('message-input');
+const sendButton = document.getElementById('send-button');
+
+function displayMessage(message) {
+    const messageElement = document.createElement('div');
+    messageElement.textContent = `${message.user}: ${message.message}`;
+    chatMessages.appendChild(messageElement);
+}
+
+
+socket.on('message', (message) => {
+    displayMessage(message);
+});
+
+
+sendButton.addEventListener('click', () => {
+    const message = messageInput.value.trim();
+    if (message !== '') {
+
+        socket.emit('chatMessage', { user: 'Usuario', message });
+        messageInput.value = '';
+    }
+});
 run().catch(console.dir);
 app.engine('handlebars', exphbs.engine());
 app.set('view engine', 'handlebars');
@@ -157,6 +209,9 @@ app.get('/api/carts/:cid', async (req, res) => {
   }
 });
 
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 app.post('/api/carts/:cid/product/:pid', async (req, res) => {
   try {
     const cartId = req.params.cid;
@@ -190,6 +245,29 @@ io.on('connection', (socket) => {
     io.emit('producto_creado', producto);
   });
 
+
+  socket.on('disconnect', () => {
+    console.log('Cliente desconectado');
+  });
+});
+
+io.on('connection', (socket) => {
+  console.log('Nuevo cliente conectado');
+
+  socket.on('chatMessage', async (data) => {
+    try {
+      const message = {
+        user: data.user,
+        message: data.message
+      };
+      // Guarda el mensaje en la base de datos MongoDB
+      await Message.create(message);
+      // Emite el mensaje a todos los clientes
+      io.emit('message', message);
+    } catch (error) {
+      console.error('Error al guardar el mensaje en la base de datos', error);
+    }
+  });
 
   socket.on('disconnect', () => {
     console.log('Cliente desconectado');
