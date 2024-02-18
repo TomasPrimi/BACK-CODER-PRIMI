@@ -8,7 +8,7 @@ const exphbs = require('express-handlebars');
 const mongoose = require('mongoose');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const { connect } = require('http2');
-const uri = "mongodb+srv://tomasprimi:<Visualcoderback1234> @ecommerce.xi0t48d.mongodb.net/?retryWrites=true&w=majority";
+const uri = "mongodb+srv://tomasprimi:<> @ecommerce.xi0t48d.mongodb.net/?retryWrites=true&w=majority";
 const Message = require('../dao/models/MessageSchema'); 
 
 const app = express();
