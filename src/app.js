@@ -11,6 +11,7 @@ const { connect } = require('http2');
 const uri = "mongodb+srv://tomasprimi:<> @ecommerce.xi0t48d.mongodb.net/?retryWrites=true&w=majority";
 const Message = require('../dao/models/MessageSchema'); 
 
+
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);

@@ -80,6 +80,7 @@ class ProductManager {
     }
   }
 
+  
   async updateProduct(productId, updatedProduct) {
     try {
       await this.loadProducts();
